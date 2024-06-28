@@ -24,6 +24,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32g474e_eval.h"
+#if defined(__ICCARM__)
+#include <LowLevelIOInterface.h>
+#endif /* __ICCARM__ */
 
 #if (USE_BSP_COM_FEATURE > 0)
   #if (USE_COM_LOG > 0)
@@ -158,6 +161,17 @@ static void COMP6_MspDeInit(COMP_HandleTypeDef *hcomp);
 static void USART1_MspInit(UART_HandleTypeDef *huart);
 static void USART1_MspDeInit(UART_HandleTypeDef *huart);
 #endif
+
+#if defined(__ICCARM__)
+/* New definition from EWARM V9, compatible with EWARM8 */
+int iar_fputc(int ch);
+#define PUTCHAR_PROTOTYPE int iar_fputc(int ch)
+#elif defined ( __CC_ARM ) || defined(__ARMCC_VERSION)
+/* ARM Compiler 5/6*/
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#elif defined(__GNUC__)
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#endif /* __ICCARM__ */
 
 #if (USE_BSP_IO_CLASS > 0)
 #if (USE_BSP_JOY_FEATURE > 0)
@@ -742,16 +756,36 @@ int32_t BSP_COM_SelectLogPort(COM_TypeDef COM)
 }
 
 /**
+  * @brief  Retargets the C library __write function to the IAR function iar_fputc.
+  * @param  file: file descriptor.
+  * @param  ptr: pointer to the buffer where the data is stored.
+  * @param  len: length of the data to write in bytes.
+  * @retval length of the written data in bytes.
+  */
+#if defined(__ICCARM__)
+size_t __write(int file, unsigned char const *ptr, size_t len)
+{
+  size_t idx;
+  unsigned char const *pdata = ptr;
+
+  for (idx = 0; idx < len; idx++)
+  {
+    iar_fputc((int)*pdata);
+    pdata++;
+  }
+  return len;
+}
+#endif /* __ICCARM__ */
+
+/**
   * @brief  Redirect console output to COM
   */
- #ifdef __GNUC__
- int __io_putchar (int ch)
+PUTCHAR_PROTOTYPE
 {
- #else
- int fputc (int ch, FILE *f)
-{
- UNUSED(f);
- #endif /* __GNUC__ */
+#if defined ( __CC_ARM ) || defined(__ARMCC_VERSION)
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(f);
+#endif /* __CC_ARM || __ARMCC_VERSION */
 
   (void)HAL_UART_Transmit (&hcom_uart [COM_ActiveLogPort], (uint8_t *) &ch, 1, COM_POLL_TIMEOUT);
   return ch;

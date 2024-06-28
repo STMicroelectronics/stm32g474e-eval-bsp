@@ -58,11 +58,11 @@
   */
 
 /**
- * @brief STM32G474E-EVAL BSP Driver version number V1.1.4
+ * @brief STM32G474E-EVAL BSP Driver version number V1.1.6
  */
 #define	STM32G474E_EVAL_BSP_VERSION_MAIN   (uint32_t)(0x01) /*!< [31:24] main version */
 #define	STM32G474E_EVAL_BSP_VERSION_SUB1   (uint32_t)(0x01) /*!< [23:16] sub1 version */
-#define	STM32G474E_EVAL_BSP_VERSION_SUB2   (uint32_t)(0x04) /*!< [15:8]  sub2 version */
+#define	STM32G474E_EVAL_BSP_VERSION_SUB2   (uint32_t)(0x06) /*!< [15:8]  sub2 version */
 #define	STM32G474E_EVAL_BSP_VERSION_RC     (uint32_t)(0x00) /*!< [7:0]  release candidate */
 #define	STM32G474E_EVAL_BSP_VERSION        ((STM32G474E_EVAL_BSP_VERSION_MAIN << 24)\
                                             |(STM32G474E_EVAL_BSP_VERSION_SUB1 << 16)\
